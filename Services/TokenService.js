@@ -19,9 +19,10 @@ class TokenService {
     if (tokenData.rows.length) {
       await pool.query(`
         UPDATE public.token
-        SET refresh_token = '${refreshToken}'
-        WHERE user_id = ${tokenData.rows[0].user_id};
+        SET refresh_token = '${refreshToken}', created_at = ${Date.now()}
+        WHERE user_id = '${tokenData.rows[0].user_id}';
     `)
+      return
     }
 
     const token = await pool.query(`
@@ -30,6 +31,39 @@ class TokenService {
     `)
 
     return token
+  }
+
+  async removeToken(refreshToken) {
+    await pool.query(`
+      DELETE FROM public.token 
+      WHERE refresh_token = '${refreshToken}'
+    `)
+  } 
+
+  validateAccessToken(token) {
+    try {
+      const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET)
+      return userData
+    } catch (e) {
+      return null
+    }
+  }
+
+  validateRefreshToken(token) {
+    try {
+      const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
+      return userData
+    } catch (e) {
+      return null
+    }
+  }
+
+  async tokenFromDb(token) {
+    const foundToken = await pool.query(`
+      SELECT * from public.token 
+      WHERE refresh_token = '${token}'
+    `)
+    return foundToken
   }
 }
 

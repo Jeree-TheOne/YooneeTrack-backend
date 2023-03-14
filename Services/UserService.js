@@ -31,6 +31,57 @@ class UserService {
     }
   }
 
+  async login(login, password) {
+    const userData = await pool.query(`SELECT id, login, email, first_name, second_name, avatar_path, is_blocked, is_premium, is_activated, password FROM public.user WHERE email = '${login}' OR login = '${login}'`)
+
+    if (!userData.rows.length) {
+      throw ApiError.BadRequest('Пользователя c таким логином не существует')
+    }
+
+    const user = userData.rows[0]
+
+    const isPassEquals = await bcrypt.compare(password, user.password)
+    if (!isPassEquals) {
+      throw ApiError.BadRequest('Некорректный пароль')
+    }
+
+    delete user.password
+    const tokens = TokenService.generateToken({...user})
+    await TokenService.saveToken(user.id, tokens.refreshToken)
+
+    return {
+      ...tokens,
+      user
+    }
+  }
+
+  async logout(refreshToken) {
+    await TokenService.removeToken(refreshToken)
+  }
+
+  async refresh(refreshToken) {
+    if (!refreshToken) {
+      throw ApiError.Unauthorized()
+    }
+
+    const userData = TokenService.validateRefreshToken(refreshToken)
+    const tokenFromDb = await TokenService.tokenFromDb(refreshToken)
+
+    if (!userData || !tokenFromDb) {
+      throw ApiError.Unauthorized()
+    }
+    const userFromDb = await pool.query(`
+    SELECT id, login, email, first_name, second_name, avatar_path, is_blocked, is_premium, is_activated FROM public.user WHERE id = '${userData.id}'
+    `)
+    const tokens = TokenService.generateToken({...userFromDb.rows[0]})
+    await TokenService.saveToken(userData.id, tokens.refreshToken)
+
+    return {
+      ...tokens,
+      user: userFromDb.rows[0]
+    }
+  }
+
   async activate(activationLink) {
     const userData = await pool.query(`
     SELECT * FROM public.user WHERE id = '${activationLink}'
