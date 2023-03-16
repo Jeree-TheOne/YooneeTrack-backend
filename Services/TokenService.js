@@ -1,5 +1,5 @@
-const pool = require('../pgConfig')
 const jwt = require('jsonwebtoken');
+const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware');
 
 class TokenService {
   generateToken(payload) {
@@ -12,32 +12,22 @@ class TokenService {
   }
 
   async saveToken(id, refreshToken) {
-    const tokenData = await pool.query(`
-    SELECT * FROM public.token
-    WHERE user_id = '${id}'
-    `)
-    if (tokenData.rows.length) {
-      await pool.query(`
-        UPDATE public.token
-        SET refresh_token = '${refreshToken}', created_at = ${Date.now()}
-        WHERE user_id = '${tokenData.rows[0].user_id}';
-    `)
+    const tokenData = await DatabaseMiddleware.select('token', [], {and: {user_id: id}})
+    if (tokenData) {
+      await DatabaseMiddleware.update('token', {refresh_token: refreshToken, created_at: Date.now()}, {and: {user_id: tokenData.user_id}})
       return
     }
 
-    const token = await pool.query(`
-      INSERT INTO public.token (created_at, user_id, refresh_token)
-      VALUES (${Date.now()}, '${id}', '${refreshToken}')
-    `)
-
+    const token = await DatabaseMiddleware.insert('token', {created_at: Date.now(), user_id: id, refresh_token: refreshToken})
     return token
   }
 
   async removeToken(refreshToken) {
-    await pool.query(`
-      DELETE FROM public.token 
-      WHERE refresh_token = '${refreshToken}'
-    `)
+    await DatabaseMiddleware.delete('token', {
+      and: {
+        refresh_token: refreshToken
+      }
+    })
   } 
 
   validateAccessToken(token) {
@@ -59,10 +49,7 @@ class TokenService {
   }
 
   async tokenFromDb(token) {
-    const foundToken = await pool.query(`
-      SELECT * from public.token 
-      WHERE refresh_token = '${token}'
-    `)
+    const foundToken = await DatabaseMiddleware.select('token', [], {and: {refresh_token: token}})
     return foundToken
   }
 }
