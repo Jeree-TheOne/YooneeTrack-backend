@@ -12,20 +12,20 @@ class TokenService {
   }
 
   async saveToken(id, refreshToken) {
-    const tokenData = await DatabaseMiddleware.select('token', [], {and: {user_id: id}})
+    const tokenData = await DatabaseMiddleware.select('token', [], {and: {userId: id}})
     if (tokenData) {
-      await DatabaseMiddleware.update('token', {refresh_token: refreshToken, created_at: Date.now()}, {and: {user_id: tokenData.user_id}})
+      await DatabaseMiddleware.update('token', {refreshToken, createdAt: Date.now()}, {and: {userId: tokenData.userId}})
       return
     }
 
-    const token = await DatabaseMiddleware.insert('token', {created_at: Date.now(), user_id: id, refresh_token: refreshToken})
+    const token = await DatabaseMiddleware.insert('token', {createdAt: Date.now(), userId: id, refreshToken})
     return token
   }
 
   async removeToken(refreshToken) {
     await DatabaseMiddleware.delete('token', {
       and: {
-        refresh_token: refreshToken
+        refreshToken
       }
     })
   } 
@@ -48,8 +48,8 @@ class TokenService {
     }
   }
 
-  async tokenFromDb(token) {
-    const foundToken = await DatabaseMiddleware.select('token', [], {and: {refresh_token: token}})
+  async tokenFromDb(refreshToken) {
+    const foundToken = await DatabaseMiddleware.select('token', [], {and: {refreshToken}})
     return foundToken
   }
 }

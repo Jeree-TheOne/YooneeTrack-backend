@@ -8,21 +8,6 @@ const errorMiddleware = require('./Middleware/ErrorMiddleware')
 const PORT = process.env.PORT || 5000
 const app = express()
 
-const DatabaseMiddleware = require('./Middleware/DatabaseMiddleware');
-(async () => {
-  // const data =  await DatabaseMiddleware.update('user', {
-  //     id: 1,
-  //     name: 'Alex',
-  //     age: 20
-  //   }, {
-  //     and: {
-  //       id: 1,
-  //       age: 10
-  //     }
-  //   })
-  // console.log(data);
-})();
-
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors())

@@ -17,7 +17,7 @@ class UserService {
 
     const user = await DatabaseMiddleware.insert('user', {
       id: activationLink,
-      created_at: Date.now(),
+      createdAt: Date.now(),
       login: email,
       password: hashPassword,
       email
@@ -87,7 +87,7 @@ class UserService {
       throw ApiError.BadRequest('Некорректная ссылка активации')
     }
 
-    await DatabaseMiddleware.update('user', {is_activated: true}, {and: {id: activationLink}})
+    await DatabaseMiddleware.update('user', {isActivated: true}, {and: {id: activationLink}})
   }
 }
 

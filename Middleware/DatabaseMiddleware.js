@@ -2,7 +2,7 @@ const ApiError = require('../Exceptions/ApiError')
 const pool = require('../pgConfig')
 
 class DatabaseMiddleware {
-  async select(table_name, columns = [], options = {where: [], orderby: {columns: [], order: 'ASC'}, limit: null, offset: 0}) {
+  async select(tableName, columns = [], options = {where: [], orderby: {columns: [], order: 'ASC'}, limit: null, offset: 0}) {
     const { and, or, orderby, limit, offset } = options
     const formattedColumns = columns.length ? columns.join(', ') : '*'
     const formattedOrderBy = orderby?.columns?.length ? `ORDER BY ${orderby.columns.join(', ')} ${orderby.order}` : ''
@@ -13,7 +13,7 @@ class DatabaseMiddleware {
     }
     try {
       const data = await pool.query(`
-        SELECT ${formattedColumns} from public."${table_name}"
+        SELECT ${formattedColumns} from public."${tableName}"
         ${conditions ? `WHERE ${conditions}` : ''}
         ${formattedOrderBy}
         ${limit != undefined ? `LIMIT ${limit} ` : ''} ${offset != undefined || limit ? `OFFSET ${offset || 0} ` : ''}
@@ -25,10 +25,10 @@ class DatabaseMiddleware {
     }
   }
 
-  async insert(table_name, value = {}) {
+  async insert(tableName, value = {}) {
     try {
       const data = await pool.query(`
-      INSERT INTO public."${table_name}" (${Object.keys(value)})
+      INSERT INTO public."${tableName}" (${Object.keys(value)})
       VALUES (${Object.values(value).map(el => `'${el}'`)})
       RETURNING *;
     `)
@@ -39,7 +39,7 @@ class DatabaseMiddleware {
     }
   }
 
-  async update(table_name, value = {}, options = {}) {
+  async update(tableName, value = {}, options = {}) {
     const { and, or } = options
     let conditions = ''
     const operator = and ? 'and' : or ? 'or' : ''
@@ -51,7 +51,7 @@ class DatabaseMiddleware {
 
     try {
       const data = await pool.query(`
-      UPDATE public."${table_name}"
+      UPDATE public."${tableName}"
       SET ${values}
       WHERE ${conditions}
       RETURNING *;
@@ -62,7 +62,7 @@ class DatabaseMiddleware {
     }
   }
 
-  async delete(table_name, options = {}) {
+  async delete(tableName, options = {}) {
     const { and, or } = options
     let conditions = ''
     const operator = and ? 'and' : or ? 'or' : ''
@@ -72,7 +72,7 @@ class DatabaseMiddleware {
 
     try {
       const data = await pool.query(`
-      DELETE FROM public."${table_name}"
+      DELETE FROM public."${tableName}"
       ${conditions ? `WHERE ${conditions}` : ''}
       RETURNING *;
     `);
