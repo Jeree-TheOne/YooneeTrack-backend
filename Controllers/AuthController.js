@@ -1,4 +1,4 @@
-const UserService = require('../Services/UserService')
+const AuthService = require('../Services/AuthService')
 const {validationResult} = require('express-validator')
 const ApiError = require('../Exceptions/ApiError')
 
@@ -11,7 +11,7 @@ class UserController {
       }
 
       const {email, password} = req.body
-      const userData = await UserService.registration(email, password)
+      const userData = await AuthService.registration(email, password)
       res.cookie('refresh-token', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
       return res.json(userData)
     } catch (e) {
@@ -27,7 +27,7 @@ class UserController {
       }
 
       const {login, password} = req.body
-      const userData = await UserService.login(login, password)
+      const userData = await AuthService.login(login, password)
       res.cookie('refresh-token', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
       return res.json(userData)
     } catch (e) {
@@ -37,7 +37,7 @@ class UserController {
 
   async logout(req, res, next) {
     try {
-      await UserService.logout(req.cookies['refresh-token'])
+      await AuthService.logout(req.cookies['refresh-token'])
       res.clearCookie('refresh-token')
       res.status(200).send()
     } catch (e) {
@@ -48,7 +48,7 @@ class UserController {
   async activate(req, res, next) {
     try {
       const activationLink = req.params.link
-      await UserService.activate(activationLink)
+      await AuthService.activate(activationLink)
       return res.redirect(process.env.CLIENT_URL)
     } catch (e) {
       next(e)
@@ -57,7 +57,7 @@ class UserController {
 
   async refresh(req, res, next) {
     try {
-      const userData = await UserService.refresh(req.cookies['refresh-token'])
+      const userData = await AuthService.refresh(req.cookies['refresh-token'])
       res.cookie('refresh-token', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
       return res.json(userData)
     } catch (e) {

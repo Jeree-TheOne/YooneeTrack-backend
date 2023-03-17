@@ -9,7 +9,7 @@ class DatabaseMiddleware {
     let conditions = ''
     const operator = and ? 'and' : or ? 'or' : ''
     if (operator) {
-      conditions +=  Object.entries(options[operator]).map(([field, value]) => `${field} = '${value}'`).join(` ${operator.toUpperCase()} `)
+      conditions += Object.entries(options[operator]).map(([field, value]) => `${field} = '${value}'`).join(` ${operator.toUpperCase()} `)
     }
     try {
       const data = await pool.query(`
@@ -25,12 +25,14 @@ class DatabaseMiddleware {
     }
   }
 
-  async insert(tableName, value = {}) {
+  async insert(tableName, value = {}, returned = []) {
+    const formattedReturned = returned.length ? returned.join(', ') : '*'
     try {
+      console.log(value);
       const data = await pool.query(`
       INSERT INTO public."${tableName}" (${Object.keys(value)})
       VALUES (${Object.values(value).map(el => `'${el}'`)})
-      RETURNING *;
+      RETURNING ${formattedReturned};
     `)
 
       return data.rows.length > 1 ? data.rows : data.rows[0]
@@ -39,13 +41,14 @@ class DatabaseMiddleware {
     }
   }
 
-  async update(tableName, value = {}, options = {}) {
+  async update(tableName, value = {}, options = {}, returned = []) {
     const { and, or } = options
     let conditions = ''
     const operator = and ? 'and' : or ? 'or' : ''
     if (operator) {
-      conditions =  Object.entries(options[operator]).map(([field, value]) => `${field} = '${value}'`).join(` ${operator.toUpperCase()} `)
+      conditions = Object.entries(options[operator]).map(([field, value]) => `${field} = '${value}'`).join(` ${operator.toUpperCase()} `)
     }
+    const formattedReturned = returned.length ? returned.join(', ') : '*'
 
     const values = Object.entries(value).map(([field, value]) => `${field} = '${value}'`).join(`, `)
 
@@ -54,7 +57,7 @@ class DatabaseMiddleware {
       UPDATE public."${tableName}"
       SET ${values}
       WHERE ${conditions}
-      RETURNING *;
+      RETURNING ${formattedReturned};
     `);
       return data.rows.length > 1 ? data.rows : data.rows[0]
     } catch (e) {
@@ -62,19 +65,20 @@ class DatabaseMiddleware {
     }
   }
 
-  async delete(tableName, options = {}) {
+  async delete(tableName, options = {}, returned = []) {
     const { and, or } = options
     let conditions = ''
     const operator = and ? 'and' : or ? 'or' : ''
     if (operator) {
-      conditions =  Object.entries(options[operator]).map(([field, value]) => `${field} = '${value}'`).join(` ${operator.toUpperCase()} `)
+      conditions = Object.entries(options[operator]).map(([field, value]) => `${field} = '${value}'`).join(` ${operator.toUpperCase()} `)
     }
+    const formattedReturned = returned.length ? returned.join(', ') : '*'
 
     try {
       const data = await pool.query(`
       DELETE FROM public."${tableName}"
       ${conditions ? `WHERE ${conditions}` : ''}
-      RETURNING *;
+      RETURNING ${formattedReturned};
     `);
     return data.rows.length > 1 ? data.rows : data.rows[0]
     } catch (e) {

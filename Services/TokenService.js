@@ -3,7 +3,7 @@ const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware');
 
 class TokenService {
   generateToken(payload) {
-    const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '30m'})
+    const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '30d'})
     const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30d'})
     return {
       accessToken,
@@ -23,17 +23,12 @@ class TokenService {
   }
 
   async removeToken(refreshToken) {
-    await DatabaseMiddleware.delete('token', {
-      and: {
-        refreshToken
-      }
-    })
+    await DatabaseMiddleware.delete('token', { and: { refreshToken} })
   } 
 
   validateAccessToken(token) {
     try {
-      const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET)
-      return userData
+      return jwt.verify(token, process.env.JWT_ACCESS_SECRET)
     } catch (e) {
       return null
     }
@@ -41,8 +36,7 @@ class TokenService {
 
   validateRefreshToken(token) {
     try {
-      const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
-      return userData
+      return jwt.verify(token, process.env.JWT_REFRESH_SECRET)
     } catch (e) {
       return null
     }
