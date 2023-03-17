@@ -1,4 +1,3 @@
-const { v4: uuid } = require('uuid');
 const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware');
 
 class FileService {

@@ -1,5 +1,4 @@
 const upload = require('../multerConfig')
-const { v4: uuid } = require('uuid');
 const FileService = require('../Services/FileService');
 const TokenService = require('../Services/TokenService');
 const UserService = require('../Services/UserService');
