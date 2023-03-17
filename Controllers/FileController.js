@@ -5,7 +5,7 @@ const TokenService = require('../Services/TokenService');
 const UserService = require('../Services/UserService');
 const ApiError = require('../Exceptions/ApiError');
 
-class AttachmentController {
+class FileController {
   async uploadAvatar(req, res, next) {
     try {
       upload(req, res, async (err) => {
@@ -42,4 +42,4 @@ class AttachmentController {
   }
 }
 
-module.exports = new AttachmentController()
+module.exports = new FileController()
