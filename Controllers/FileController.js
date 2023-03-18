@@ -12,9 +12,8 @@ class FileController {
           throw ApiError.BadRequest(err.message)
         } else if (req.file) {
           const imageId = await FileService.upload(req.file.path)
-          const user = TokenService.validateAccessToken(req.headers.authorization.split(' ')[1])
-          console.log(imageId, user.id);
-          await UserService.changeAvatar(user.id, imageId)
+          const { id } = TokenService.validateAccessToken(req.headers.authorization.split(' ')[1])
+          await UserService.changeAvatar(id, imageId)
 
           return res.status(200).send()
         } else {

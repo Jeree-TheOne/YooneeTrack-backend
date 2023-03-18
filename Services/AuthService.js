@@ -24,13 +24,8 @@ class UserService {
     })
 
     EmailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`)
-    const tokens = TokenService.generateToken({...user})
-    await TokenService.saveToken(user.id, tokens.refreshToken)
 
-    return {
-      ...tokens,
-      user
-    }
+    return this.generateToken(user)
   }
 
   async login(login, password) {
@@ -45,13 +40,8 @@ class UserService {
     }
 
     delete user.password
-    const tokens = TokenService.generateToken({...user})
-    await TokenService.saveToken(user.id, tokens.refreshToken)
 
-    return {
-      ...tokens,
-      user
-    }
+    return this.generateToken(user)
   }
 
   async logout(refreshToken) {
@@ -71,13 +61,8 @@ class UserService {
     }
     const userFromDb = await DatabaseMiddleware.select('user', [], {and: {id: userData.id}})
     delete userFromDb.password
-    const tokens = TokenService.generateToken({...userFromDb})
-    await TokenService.saveToken(userData.id, tokens.refreshToken)
 
-    return {
-      ...tokens,
-      user: userFromDb
-    }
+    return this.generateToken(userFromDb)
   }
 
   async activate(activationLink) {
@@ -87,6 +72,16 @@ class UserService {
     }
 
     await DatabaseMiddleware.update('user', {isActivated: true}, {and: {id: activationLink}})
+  }
+
+  async generateToken(user) {
+    const tokens = TokenService.generateToken({...user})
+    await TokenService.saveToken(user.id, tokens.refreshToken)
+
+    return {
+      ...tokens,
+      user
+    }
   }
 }
 
