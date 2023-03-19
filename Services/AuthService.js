@@ -5,7 +5,7 @@ const TokenService = require('./TokenService')
 const ApiError = require('../Exceptions/ApiError')
 const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware')
 
-class UserService {
+class AuthService {
   async registration(email, password) {
     const candidate = await DatabaseMiddleware.select('user', [], {and: {email}})
     if (candidate) {
@@ -17,7 +17,7 @@ class UserService {
 
     const user = await DatabaseMiddleware.insert('user', {
       id: activationLink,
-      createdAt: Date.now(),
+      created_at: Date.now(),
       login: email,
       password: hashPassword,
       email
@@ -44,17 +44,17 @@ class UserService {
     return this.generateToken(user)
   }
 
-  async logout(refreshToken) {
-    await TokenService.removeToken(refreshToken)
+  async logout(refresh_token) {
+    await TokenService.removeToken(refresh_token)
   }
 
-  async refresh(refreshToken) {
-    if (!refreshToken) {
+  async refresh(refresh_token) {
+    if (!refresh_token) {
       throw ApiError.Unauthorized()
     }
 
-    const userData = TokenService.validateRefreshToken(refreshToken)
-    const tokenFromDb = await TokenService.tokenFromDb(refreshToken)
+    const userData = TokenService.validateRefreshToken(refresh_token)
+    const tokenFromDb = await TokenService.tokenFromDb(refresh_token)
 
     if (!userData || !tokenFromDb) {
       throw ApiError.Unauthorized()
@@ -76,7 +76,7 @@ class UserService {
 
   async generateToken(user) {
     const tokens = TokenService.generateToken({...user})
-    await TokenService.saveToken(user.id, tokens.refreshToken)
+    await TokenService.saveToken(user.id, tokens.refresh_token)
 
     return {
       ...tokens,
@@ -85,4 +85,4 @@ class UserService {
   }
 }
 
-module.exports = new UserService();
+module.exports = new AuthService();

@@ -3,32 +3,32 @@ const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware');
 
 class TokenService {
   generateToken(payload) {
-    const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '30d'})
-    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30d'})
+    const access_token = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '30d'})
+    const refresh_token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30d'})
     return {
-      accessToken,
-      refreshToken
+      access_token,
+      refresh_token
     }
   }
 
-  async saveToken(id, refreshToken) {
-    const tokenData = await DatabaseMiddleware.select('token', [], {and: {userId: id}})
+  async saveToken(id, refresh_token) {
+    const tokenData = await DatabaseMiddleware.select('token', [], {and: {user_id: id}})
     if (tokenData) {
-      await DatabaseMiddleware.update('token', {refreshToken, createdAt: Date.now()}, {and: {userId: tokenData.userId}})
+      await DatabaseMiddleware.update('token', {refresh_token, createdAt: Date.now()}, {and: {user_id: tokenData.user_id}})
       return
     }
 
-    const token = await DatabaseMiddleware.insert('token', {createdAt: Date.now(), userId: id, refreshToken})
+    const token = await DatabaseMiddleware.insert('token', {created_at: Date.now(), user_id: id, refresh_token})
     return token
   }
 
-  async removeToken(refreshToken) {
-    await DatabaseMiddleware.delete('token', { and: { refreshToken} })
+  async removeToken(refresh_token) {
+    await DatabaseMiddleware.delete('token', { and: { refresh_token} })
   } 
 
   validateAccessToken(token) {
     try {
-      return jwt.verify(token, process.env.JWT_ACCESS_SECRET)
+      return jwt.verify(token.split(' ')[1], process.env.JWT_ACCESS_SECRET)
     } catch (e) {
       return null
     }
@@ -42,8 +42,8 @@ class TokenService {
     }
   }
 
-  async tokenFromDb(refreshToken) {
-    const foundToken = await DatabaseMiddleware.select('token', [], {and: {refreshToken}})
+  async tokenFromDb(refresh_token) {
+    const foundToken = await DatabaseMiddleware.select('token', [], {and: {refresh_token}})
     return foundToken
   }
 }

@@ -3,7 +3,17 @@ const removeEmpty = (obj) => {
   return obj;
 }
 
+const jsArrayToPgArray = (array) => {
+  return `{ ${array.join(', ')} }`
+}
+
+const selectTableFromString = (string) => {
+  const [table, ...params] = string.split('.')
+  return `public."${table}"${params.length ? `.${params.join('.')}` : ''}`
+}
 
 module.exports = {
-  removeEmpty
+  removeEmpty,
+  jsArrayToPgArray,
+  selectTableFromString
 }

@@ -9,13 +9,7 @@ module.exports = function(req, res, next) {
       return next(ApiError.Unauthorized())
     }
 
-    const accessToken = authorizationHeader.split(' ')[1]
-
-    if (!accessToken) {
-      return next(ApiError.Unauthorized())
-    }
-
-    const userData = TokenService.validateAccessToken(accessToken)
+    const userData = TokenService.validateAccessToken(authorizationHeader)
     if (!userData) {
       return next(ApiError.Unauthorized())
     }
