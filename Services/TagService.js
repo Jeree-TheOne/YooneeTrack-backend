@@ -1,7 +1,8 @@
 const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware')
+const { removeEmpty } = require('../utils/dataFormatter')
 
 class TagService {
-  async add(name, background, color, workspace_id) {
+  async add(name, background = '#FF0000', color = '#000000', workspace_id) {
     const { id } = await DatabaseMiddleware.insert('tag', {name, background, color, workspace_id, created_at: Date.now()}, ['id'])
     return id
   }
@@ -11,8 +12,8 @@ class TagService {
     return tag_id
   }
 
-  async update(name, background, color, id) {
-    const tag = await DatabaseMiddleware.update('tag', { name, background, color }, { and: { id } })
+  async update(id, name, background, color) {
+    const tag = await DatabaseMiddleware.update('tag', removeEmpty({ name, background, color }), { and: { id } })
     return tag
   }
 

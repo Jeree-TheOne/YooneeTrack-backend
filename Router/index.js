@@ -11,6 +11,8 @@ const TaskRouter = require('./task')
 const DeskRouter = require('./desk')
 const RowRouter = require('./row')
 const ColumnRouter = require('./column')
+const TaskTypeRouter = require('./taskType')
+const TagRouter = require('./tag')
 
 router.post('/registration',
   body('email').isEmail(),
@@ -31,5 +33,7 @@ router.use('/task', TaskRouter)
 router.use('/desk', DeskRouter)
 router.use('/row', RowRouter)
 router.use('/column', ColumnRouter)
+router.use('/task-type', TaskTypeRouter)
+router.use('/tag', TagRouter)
 
 module.exports = router

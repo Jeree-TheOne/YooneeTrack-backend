@@ -11,7 +11,7 @@ class TaskTypeService {
     return task_type_id
   }
 
-  async update(name, id) {
+  async update(id, name) {
     const task_type = await DatabaseMiddleware.update('task_type', { name }, { and: { id } })
     return task_type
   }
