@@ -15,6 +15,14 @@ class RowService {
     const row = await DatabaseMiddleware.update('row', { name }, { and: { id } })
     return row
   }
+
+  async selectAll(workspace_id) {
+    const rows = await DatabaseMiddleware.select('row', ['id', 'name'], { 
+      where: {and: { workspace_id } },
+      orderby: { created_at: "ASC"}
+    })
+    return rows
+  }
 }
 
 module.exports = new RowService()

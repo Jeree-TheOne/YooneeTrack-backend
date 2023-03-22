@@ -3,16 +3,31 @@ const pool = require('../pgConfig')
 const { selectTableFromString } = require('../utils/dataFormatter')
 
 class DatabaseMiddleware {
-  async select(tableName, columns = [], options = {where: [], orderby: {columns: [], order: 'ASC'}, limit: null, offset: 0}, join = null) {
-    const { and, or, orderby, limit, offset } = options
+  async select(tableName, columns = [], options, join = null) {
+    const { where, orderby, limit, offset } = options
     const formattedColumns = !columns.length ? '*' : join ? columns.map(e => `${selectTableFromString(e)}`).join(', ') : columns.join(', ')
-    const formattedOrderBy = orderby?.columns?.length ? `ORDER BY ${orderby.columns.join(', ')} ${orderby.order}` : ''
+    const formattedOrderBy = orderby ? `ORDER BY ${Object.entries(orderby).map(([field, value]) => `${field} ${value}`).join(', ')}` : ''
     let conditions = ''
-    const operator = and ? 'and' : or ? 'or' : ''
+    const operator =  Object.keys(where)[0]
     if (operator) {
-      conditions += Object.entries(options[operator]).map(([field, value]) => `${join ? selectTableFromString(field) : `"${field}"`} = '${value}'`).join(` ${operator.toUpperCase()} `)
+      switch (operator) {
+        case 'not': {
+          const field = Object.keys(where[operator])[0]
+          conditions += `${field} NOT IN (${where[operator][field].map(e => `'${e}'`).join(',')})`
+          break
+        }
+        case 'in': {
+          const field = Object.keys(where[operator])[0]
+          conditions += `${field} IN (${where[operator][field].map(e => `'${e}'`).join(',')})`
+          break
+        }
+        default: {
+          conditions += Object.entries(where[operator]).map(([field, value]) => `${join ? selectTableFromString(field) : `${field}`} = '${value}'`).join(` ${operator.toUpperCase()} `)
+          break
+        }
+      }
     }
-    const formattedJoin = join ? Object.entries(join).map(([table, on]) => `INNER JOIN ${selectTableFromString(table)} ON ${selectTableFromString(`${table}.${on[0]}`)} = ${selectTableFromString(on[1])}`).join('\n') : '';
+    const formattedJoin = join ? Object.entries(join).map(([table, on]) => `${on[2] ? `${on[2]}` : 'INNER'} JOIN ${selectTableFromString(table)} ON ${selectTableFromString(`${table}.${on[0]}`)} = ${selectTableFromString(on[1])}`).join('\n') : '';
     try {
       const data = await pool.query(`
       SELECT ${formattedColumns} FROM ${selectTableFromString(tableName)}
@@ -55,6 +70,12 @@ class DatabaseMiddleware {
     const values = Object.entries(value).map(([field, value]) => `"${field}" = '${value}'`).join(`, `)
 
     try {
+      console.log(`
+      UPDATE public."${tableName}"
+      SET ${values}
+      WHERE ${conditions}
+      RETURNING ${formattedReturned};
+    `);
       const data = await pool.query(`
       UPDATE public."${tableName}"
       SET ${values}

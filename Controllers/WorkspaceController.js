@@ -1,3 +1,4 @@
+const ApiError = require('../Exceptions/ApiError')
 const ColumnService = require('../Services/ColumnService')
 const DeskService = require('../Services/DeskService')
 const MemberService = require('../Services/MemberService')
@@ -31,7 +32,7 @@ class WorkspaceController {
 
       await TaskTypeService.add('Задача', workspaceId)
 
-      await TagService.add('Приоритет', '#FF0000', '#000000', workspaceId)
+      await TagService.add('Важное', '#FF0000', '#000000', workspaceId)
       
       return res.redirect(`${process.env.CLIENT_URL}/workspaces/${workspaceId}`)
     } catch (e) {
@@ -50,7 +51,35 @@ class WorkspaceController {
   }
 
   async selectOne(req, res, next) {
-    
+    const { id: userId } = TokenService.validateAccessToken(req.headers.authorization)
+
+    const workspaceId = req.params.workspace
+    try {
+      const isWorkspaceAvailable = MemberService.isWorkspaceAvailable(userId, workspaceId)
+      if (!isWorkspaceAvailable) {
+        throw ApiError.BadRequest('Рабочее пространство Вам недоступно')
+      }
+
+      const [desks, rows, columns, tags, taskTypes, workspace] = await Promise.all([
+        DeskService.selectAll(workspaceId),
+        TagService.selectAll(workspaceId),
+        TaskTypeService.selectAll(workspaceId),
+        RowService.selectAll(workspaceId),
+        ColumnService.selectAll(workspaceId),
+        WorkspaceService.selectOne(workspaceId)
+      ])
+
+      return res.status(200).json({
+        ...workspace,
+        desks,
+        rows,
+        columns,
+        tags,
+        taskTypes,
+      })
+    } catch (e) {
+      next(e)
+    }
   }
 }
 

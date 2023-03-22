@@ -6,15 +6,15 @@ const bcrypt = require('bcrypt')
 
 
 class UserService {
-  async changeAvatar(id, imageId) {
-    const user = await DatabaseMiddleware.update('user', { image: imageId }, { and: { id } })
+  async changeAvatar(id, image_id) {
+    const user = await DatabaseMiddleware.update('user', { image: image_id }, { and: { id } })
     delete user.password
     return user
   }
 
-  async changeData(id, login, firstName, secondName, isBlocked, isPremium) {
+  async changeData(id, login, first_name, second_name, is_blocked, is_premium) {
     try {
-      const user = await DatabaseMiddleware.update('user', removeEmpty({ login, firstName, secondName, isBlocked, isPremium }), { and: { id } })
+      const user = await DatabaseMiddleware.update('user', removeEmpty({ login, first_name, second_name, is_blocked, is_premium }), { and: { id } })
       delete user.password
       return generateToken(user)
     } catch (e) {
@@ -24,7 +24,7 @@ class UserService {
 
   async changePassword(id, oldPassword, newPassword) {
     try {
-      const { password } = await DatabaseMiddleware.select('user', ['password'], {and: {id}})
+      const { password } = await DatabaseMiddleware.select('user', ['password'], {where: {and: {id}}})
       const isPassEquals = await bcrypt.compare(oldPassword, password)
       if (!isPassEquals) {
         throw ApiError.BadRequest('Неверный старый пароль')

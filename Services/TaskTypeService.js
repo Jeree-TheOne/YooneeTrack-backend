@@ -15,6 +15,14 @@ class TaskTypeService {
     const task_type = await DatabaseMiddleware.update('task_type', { name }, { and: { id } })
     return task_type
   }
+
+  async selectAll(workspace_id) {
+    const task_types = await DatabaseMiddleware.select('task_type', ['id', 'name'], { 
+      where: { and: { workspace_id } },
+      orderby: { created_at: "ASC"}
+    })
+    return task_types
+  }
 }
 
 module.exports = new TaskTypeService()

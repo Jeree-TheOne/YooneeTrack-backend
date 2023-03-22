@@ -7,7 +7,7 @@ const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware')
 
 class AuthService {
   async registration(email, password) {
-    const candidate = await DatabaseMiddleware.select('user', [], {and: {email}})
+    const candidate = await DatabaseMiddleware.select('user', [], {where: {and: {email}}})
     if (candidate) {
       throw ApiError.BadRequest(`Пользователь c таким почтовым адресом ${email} уже существует`)
     }
@@ -59,19 +59,19 @@ class AuthService {
     if (!userData || !tokenFromDb) {
       throw ApiError.Unauthorized()
     }
-    const userFromDb = await DatabaseMiddleware.select('user', [], {and: {id: userData.id}})
+    const userFromDb = await DatabaseMiddleware.select('user', [], {where: {and: {id: userData.id}}})
     delete userFromDb.password
 
     return this.generateToken(userFromDb)
   }
 
   async activate(activationLink) {
-    const user = await DatabaseMiddleware.select('user', [], {and: {id: activationLink}})
+    const user = await DatabaseMiddleware.select('user', [], {where:{and: {id: activationLink}}})
     if (!user) {
       throw ApiError.BadRequest('Некорректная ссылка активации')
     }
 
-    await DatabaseMiddleware.update('user', {isActivated: true}, {and: {id: activationLink}})
+    await DatabaseMiddleware.update('user', {is_activated: true}, {and: {id: activationLink}})
   }
 
   async generateToken(user) {

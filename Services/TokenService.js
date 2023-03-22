@@ -12,9 +12,9 @@ class TokenService {
   }
 
   async saveToken(id, refresh_token) {
-    const tokenData = await DatabaseMiddleware.select('token', [], {and: {user_id: id}})
+    const tokenData = await DatabaseMiddleware.select('token', [], {where: {and: {user_id: id}}})
     if (tokenData) {
-      await DatabaseMiddleware.update('token', {refresh_token, createdAt: Date.now()}, {and: {user_id: tokenData.user_id}})
+      await DatabaseMiddleware.update('token', {refresh_token, created_at: Date.now()}, {and: {user_id: tokenData.user_id}})
       return
     }
 
@@ -43,7 +43,7 @@ class TokenService {
   }
 
   async tokenFromDb(refresh_token) {
-    const foundToken = await DatabaseMiddleware.select('token', [], {and: {refresh_token}})
+    const foundToken = await DatabaseMiddleware.select('token', [], {where: {and: {refresh_token}}})
     return foundToken
   }
 }

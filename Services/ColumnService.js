@@ -15,6 +15,14 @@ class ColumnService {
     const column = await DatabaseMiddleware.update('column', { name }, { and: { id } })
     return column
   }
+
+  async selectAll(workspace_id) {
+    const columns = await DatabaseMiddleware.select('column', ['id', 'name'], { 
+      where: {and: { workspace_id }},
+      orderby: { created_at: "ASC"}
+    })
+    return columns
+  }
 }
 
 module.exports = new ColumnService()

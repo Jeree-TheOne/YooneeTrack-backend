@@ -15,6 +15,20 @@ class TagService {
     const tag = await DatabaseMiddleware.update('tag', { name, background, color }, { and: { id } })
     return tag
   }
+
+  async selectAll(workspace_id) {
+    const tags = await DatabaseMiddleware.select('tag', ['id', 'name', 'background', 'color'], { 
+      where: {and: { workspace_id }},
+      orderby: { created_at: "ASC"}
+    })
+    return tags
+  }
+
+  async select(tags_id) {
+    const tags = await DatabaseMiddleware.select('tag', ['id', 'name', 'background', 'color'], { where: { in: {id: tags_id}}})
+    if (tags instanceof Array) return tags
+    return [tags]
+  }
 }
 
 module.exports = new TagService()
