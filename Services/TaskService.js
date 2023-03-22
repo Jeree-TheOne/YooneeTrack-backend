@@ -24,6 +24,7 @@ class TaskService {
           file: [ 'id', 'user.image', 'full' ] 
         }
       )
+      if (tasks == null) return []
       if (tasks instanceof Array) { return tasks }
       return [tasks]
     } catch (e) {

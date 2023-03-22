@@ -2,10 +2,10 @@ const ColumnService = require('../Services/ColumnService')
 
 class ColumnController {
   async create(req, res, next) {
-    const { workspaceId } = req.params
+    const { workspace } = req
     const { name } = req.body
     try {
-      await ColumnService.add(name, workspaceId)
+      await ColumnService.add(name, workspace)
       res.status(200).json('Успешно')
     } catch (e) {
       next(e)

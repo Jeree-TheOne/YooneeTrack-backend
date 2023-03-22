@@ -16,7 +16,7 @@ class WorkspaceController {
       if (!workspaceName) {
         throw ApiError.BadRequest('Не указано название рабочего пространства')
       }
-      const user = TokenService.validateAccessToken(req.headers.authorization)
+      const user = req.user
       const workspaceId = await WorkspaceService.insert(workspaceName)
 
       const memberName = MemberService.displayName(user)
@@ -41,7 +41,7 @@ class WorkspaceController {
   }
 
   async selectAvailable(req, res, next) {
-    const { id } = TokenService.validateAccessToken(req.headers.authorization)
+    const { id } = req.user
     try {
       const availableWorkspaces = await WorkspaceService.selectAvailable(id)
       res.status(200).json(availableWorkspaces)
@@ -51,7 +51,7 @@ class WorkspaceController {
   }
 
   async selectOne(req, res, next) {
-    const { id: userId } = TokenService.validateAccessToken(req.headers.authorization)
+    const { id: userId } = req.user
 
     const workspaceId = req.params.workspace
     try {

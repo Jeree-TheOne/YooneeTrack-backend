@@ -3,10 +3,10 @@ const RowService = require('../Services/RowService')
 
 class RowController {
   async create(req, res, next) {
-    const { workspaceId } = req.params
+    const { workspace } = req
     const { name } = req.body
     try {
-      await RowService.add(name, workspaceId)
+      await RowService.add(name, workspace)
       res.status(200).json('Успешно')
     } catch (e) {
       next(e)

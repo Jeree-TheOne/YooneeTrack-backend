@@ -27,6 +27,7 @@ class TagService {
 
   async select(tags_id) {
     const tags = await DatabaseMiddleware.select('tag', ['id', 'name', 'background', 'color'], { where: { in: {id: tags_id}}})
+    if (tags == null) return []
     if (tags instanceof Array) return tags
     return [tags]
   }

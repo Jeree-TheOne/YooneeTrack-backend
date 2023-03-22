@@ -8,10 +8,11 @@ const TokenService = require('../Services/TokenService')
 
 class TaskController {
   async create(req, res, next) {
-    const { title, description, rowId, columnId, deskId, taskTypeId, tags, workspaceId } = req.body
-    const { id } = TokenService.validateAccessToken(req.headers.authorization)
+    const { title, description, rowId, columnId, deskId, taskTypeId, tags } = req.body
+    const { workspace } = req
+    const { id } = req.user
     try {      
-      const creator = await MemberService.getMemberId(id, workspaceId)
+      const creator = await MemberService.getMemberId(id, workspace)
       if (!creator) {
         throw ApiError.BadRequest('Пользователь не является участником рабочего пространства')
       }
@@ -23,14 +24,14 @@ class TaskController {
   }
 
   async selectAll(req, res, next) {
-    const { id } = TokenService.validateAccessToken(req.headers.authorization)
+    const { user, workspace } = req
+    const { id } = user
     const { deskId } = req.query
-    try {
-      const { workspace_id } = await DeskService.selectOne(deskId)
-      const isWorkspaceAvailable = await MemberService.isWorkspaceAvailable(id, workspace_id)
-      if (!isWorkspaceAvailable) {
-        throw ApiError.BadRequest('Рабочее пространство Вам недоступно')
-      }
+
+    if (!workspace) {
+      throw ApiError.BadRequest('Рабочее пространство Вам недоступно')
+    }
+    try { 
       const tasks = await TaskService.selectAll(deskId)
 
       res.status(200).json(tasks)
@@ -62,7 +63,7 @@ class TaskController {
   }
 
   async update(req, res, next) {
-    const { id } = TokenService.validateAccessToken(req.headers.authorization)
+    const { id } = req.user
     const  taskId = req.params.taskId
     const { ...args } = req.body 
     try {

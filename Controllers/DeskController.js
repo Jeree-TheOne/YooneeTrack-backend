@@ -2,10 +2,10 @@ const DeskService = require('../Services/DeskService')
 
 class DeskController {
   async create(req, res, next) {
-    const { workspaceId } = req.params
+    const { workspace } = req
     const { name, isCurrent  } = req.body
     try {
-      await DeskService.add(name, workspaceId, isCurrent)
+      await DeskService.add(name, workspace, isCurrent)
       res.status(200).json('Успешно')
     } catch (e) {
       next(e)
@@ -35,9 +35,9 @@ class DeskController {
 
   async setCurrent(req, res, next) {
     const { deskId } = req.params
-    const { workspaceId } = req.body
+    const { workspace } = req
     try {
-      await DeskService.setCurrent(deskId, workspaceId)
+      await DeskService.setCurrent(deskId, workspace)
       res.status(200).json('Успешно')
     } catch (e) {
       next(e)
@@ -55,9 +55,9 @@ class DeskController {
   }
 
   async getCurrent(req, res, next) {
-    const workspaceId = req.params.workspaceId
+    const { workspace } = req
     try {
-      const desk = await DeskService.selectCurrent(workspaceId)
+      const desk = await DeskService.selectCurrent(workspace)
       res.status(200).json(desk)
     } catch (e) {
       next(e)

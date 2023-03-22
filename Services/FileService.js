@@ -8,6 +8,7 @@ class FileService {
 
   async selectFiles(files_id) {
     const files = await DatabaseMiddleware.select('file', ['path'], { where: { in: {id: files_id}}})
+    if (files == null) return []
     if (files instanceof Array) {
       return files.map(file => file.path)
     }

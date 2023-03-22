@@ -41,6 +41,7 @@ class DeskService {
       where: {and: { workspace_id }},
       orderby: { is_current: 'DESC', created_at: "DESC"}
     })
+    if (desks == null) return []
     if (desks instanceof Array) return desks
     return [desks]
   }

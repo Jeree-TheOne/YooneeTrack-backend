@@ -1,9 +1,11 @@
 const ApiError = require('../Exceptions/ApiError')
 const TokenService = require('../Services/TokenService')
+const MemberService = require('../Services/MemberService')
 
-module.exports = function(req, res, next) {
+module.exports = async function(req, res, next) {
   try {
     const authorizationHeader = req.headers.authorization
+    const workspace = req.headers.workspace
 
     if (!authorizationHeader) {
       return next(ApiError.Unauthorized())
@@ -14,6 +16,8 @@ module.exports = function(req, res, next) {
       return next(ApiError.Unauthorized())
     }
 
+    const isWorkspaceAvailable = await MemberService.isWorkspaceAvailable(userData.id, workspace)
+    if (isWorkspaceAvailable) req.workspace = workspace
     req.user = userData
     next()
 

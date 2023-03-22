@@ -3,10 +3,10 @@ const TagService = require('../Services/TagService')
 
 class TagController {
   async create(req, res, next) {
-    const { workspaceId } = req.params
+    const { workspace } = req
     const { name, background, color } = req.body
     try {
-      await TagService.add(name, background, color, workspaceId)
+      await TagService.add(name, background, color, workspace)
       res.status(200).json('Успешно')
     } catch (e) {
       next(e)

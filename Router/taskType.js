@@ -5,7 +5,7 @@ const TaskTypeController = require('../Controllers/TaskTypeController')
 const AuthMiddleware = require('../Middleware/AuthMiddleware')
 
 
-router.post('/add/:workspaceId', AuthMiddleware, TaskTypeController.create) // +
+router.post('/add/', AuthMiddleware, TaskTypeController.create) // +
 router.put('/update/:taskTypeId', AuthMiddleware, TaskTypeController.update) // +
 router.delete('/delete/:taskTypeId', AuthMiddleware, TaskTypeController.delete) // +
 
