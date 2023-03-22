@@ -7,15 +7,15 @@ class WorkspaceService {
   }
 
   async selectAvailable(user_id) {
-    const workspaces = await DatabaseMiddleware.select('workspace', [], {
+    const workspaces = await DatabaseMiddleware.select('workspace', ['workspace.*'], {
       where: { and: { 'user.id': user_id } }
     }, { 
       member: ['workspace_id', 'workspace.id'], 
       user: ['id', 'member.user_id'] 
     })
-
-    delete workspaces.created_at
-    return workspaces
+    if (workspaces == null) return []
+    if (workspaces instanceof Array) return workspaces
+    return [workspaces]
   }
 
   async selectOne(id) {

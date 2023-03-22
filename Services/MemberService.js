@@ -55,6 +55,18 @@ class MemberService {
     )
     return member
   }
+
+  async getMembers(workspace_id) {
+    const members = await DatabaseMiddleware.select('member', ['member.id', 'member.display_name', 'user.email', 'file.path'], 
+      { where: { and: { 'member.workspace_id': workspace_id }}},
+      {
+        user: ['id', 'member.user_id'],
+        file: [ 'id', 'user.image', 'full' ]
+      }
+    )
+    if (members instanceof Array) return members
+    return [members]
+  }
 }
 
 module.exports = new MemberService()

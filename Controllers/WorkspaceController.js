@@ -60,13 +60,14 @@ class WorkspaceController {
         throw ApiError.BadRequest('Рабочее пространство Вам недоступно')
       }
 
-      const [desks, rows, columns, tags, taskTypes, workspace] = await Promise.all([
+      const [desks, rows, columns, tags, taskTypes, workspace, members] = await Promise.all([
         DeskService.selectAll(workspaceId),
         TagService.selectAll(workspaceId),
         TaskTypeService.selectAll(workspaceId),
         RowService.selectAll(workspaceId),
         ColumnService.selectAll(workspaceId),
-        WorkspaceService.selectOne(workspaceId)
+        WorkspaceService.selectOne(workspaceId),
+        MemberService.getMembers(workspaceId)
       ])
 
       return res.status(200).json({
@@ -76,7 +77,18 @@ class WorkspaceController {
         columns,
         tags,
         taskTypes,
+        members
       })
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  async getMembers(req, res, next) {
+    const { workspace } = req
+    try {
+      const members = await MemberService.getMembers(workspace)
+      res.status(200).json(members)
     } catch (e) {
       next(e)
     }
