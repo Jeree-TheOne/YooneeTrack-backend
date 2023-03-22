@@ -11,7 +11,7 @@ class RowService {
     return row_id
   }
 
-  async update(name, id) {
+  async update(id, name) {
     const row = await DatabaseMiddleware.update('row', { name }, { and: { id } })
     return row
   }

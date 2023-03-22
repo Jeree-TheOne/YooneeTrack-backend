@@ -2,7 +2,8 @@ const DeskService = require('../Services/DeskService')
 
 class DeskController {
   async create(req, res, next) {
-    const { name, workspaceId, isCurrent  } = req.body
+    const { workspaceId } = req.params
+    const { name, isCurrent  } = req.body
     try {
       await DeskService.add(name, workspaceId, isCurrent)
       res.status(200).json('Успешно')

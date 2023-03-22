@@ -5,7 +5,7 @@ const DeskController = require('../Controllers/DeskController')
 const AuthMiddleware = require('../Middleware/AuthMiddleware')
 
 
-router.post('/add', AuthMiddleware, DeskController.create) // +
+router.post('/add/:workspaceId', AuthMiddleware, DeskController.create) // +
 router.get('/current/:workspaceId', AuthMiddleware, DeskController.getCurrent) // +
 router.get('/:deskId', AuthMiddleware, DeskController.getOne) // +
 router.put('/update/:deskId', AuthMiddleware, DeskController.update) // +

@@ -9,6 +9,8 @@ const UserRouter = require('./user')
 const WorkspaceRouter = require('./workspace')
 const TaskRouter = require('./task')
 const DeskRouter = require('./desk')
+const RowRouter = require('./row')
+const ColumnRouter = require('./column')
 
 router.post('/registration',
   body('email').isEmail(),
@@ -27,5 +29,7 @@ router.use('/user', UserRouter)
 router.use('/workspace', WorkspaceRouter)
 router.use('/task', TaskRouter)
 router.use('/desk', DeskRouter)
+router.use('/row', RowRouter)
+router.use('/column', ColumnRouter)
 
 module.exports = router

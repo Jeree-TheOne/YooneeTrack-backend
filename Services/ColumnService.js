@@ -11,7 +11,7 @@ class ColumnService {
     return column_id
   }
 
-  async update(name, id) {
+  async update(id, name) {
     const column = await DatabaseMiddleware.update('column', { name }, { and: { id } })
     return column
   }
