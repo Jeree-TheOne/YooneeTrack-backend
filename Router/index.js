@@ -8,6 +8,7 @@ const upload = require('../multerConfig')
 const UserRouter = require('./user')
 const WorkspaceRouter = require('./workspace')
 const TaskRouter = require('./task')
+const DeskRouter = require('./desk')
 
 router.post('/registration',
   body('email').isEmail(),
@@ -25,5 +26,6 @@ router.post('/upload-avatar', AuthMiddleware, FileController.uploadAvatar)
 router.use('/user', UserRouter)
 router.use('/workspace', WorkspaceRouter)
 router.use('/task', TaskRouter)
+router.use('/desk', DeskRouter)
 
 module.exports = router

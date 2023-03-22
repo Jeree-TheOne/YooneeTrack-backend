@@ -70,12 +70,6 @@ class DatabaseMiddleware {
     const values = Object.entries(value).map(([field, value]) => `"${field}" = '${value}'`).join(`, `)
 
     try {
-      console.log(`
-      UPDATE public."${tableName}"
-      SET ${values}
-      WHERE ${conditions}
-      RETURNING ${formattedReturned};
-    `);
       const data = await pool.query(`
       UPDATE public."${tableName}"
       SET ${values}
