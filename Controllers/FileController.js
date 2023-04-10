@@ -1,6 +1,5 @@
 const { uploadAvatar } = require('../multerConfig')
 const FileService = require('../Services/FileService');
-const TokenService = require('../Services/TokenService');
 const UserService = require('../Services/UserService');
 const ApiError = require('../Exceptions/ApiError');
 
@@ -12,26 +11,12 @@ class FileController {
           throw ApiError.BadRequest(err.message)
         } else if (req.file) {
           const { id } = req.user
-          const imageId = await FileService.upload(req.file.path)
-          await UserService.changeAvatar(id, imageId)
+          const imageId = await FileService.uploadSingle(req.file.path)
+          const data = await UserService.changeAvatar(id, imageId)
 
-          return res.status(200).send()
+          return res.status(200).json(data)
         } else {
           return ApiError.BadRequest('Нет фотографии')
-        }
-      })
-    } catch (e) {
-      next(e)
-    }
-  }
-
-  async addFilesToTask(req, res, next) {
-    try {
-      upload(req, res, async (err) => {
-        if (err) {
-          throw ApiError.BadRequest(err.message)
-        } else if (req.file) {
-          
         }
       })
     } catch (e) {

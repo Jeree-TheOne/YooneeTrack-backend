@@ -23,8 +23,8 @@ router.post('/login',
   AuthController.login)
 router.post('/logout', AuthMiddleware, AuthController.logout)
 router.get('/activate/:link', AuthController.activate)
-router.get('/refresh', AuthMiddleware, AuthController.refresh)
-router.post('/upload-avatar', AuthMiddleware, FileController.uploadAvatar)
+router.get('/refresh', AuthController.refresh)
+router.put('/upload-avatar', AuthMiddleware, FileController.uploadAvatar)
 
 router.use('/user', UserRouter)
 router.use('/workspace', WorkspaceRouter)

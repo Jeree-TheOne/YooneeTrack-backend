@@ -15,23 +15,30 @@ class AuthService {
     const hashPassword = await bcrypt.hash(password, 10)
     const activationLink = uuid.v4().toString()
 
-    const user = await DatabaseMiddleware.insert('user', {
+    await DatabaseMiddleware.insert('user', {
       id: activationLink,
       created_at: Date.now(),
       login: email,
       password: hashPassword,
+      image: '72ea1172-17a7-4b14-a706-1dec062e080a',
       email
     })
 
     EmailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`)
-
-    return this.generateToken(user)
   }
 
   async login(login, password) {
-    const user = await DatabaseMiddleware.select('user', [], {or: {email: login, login}})
+    const user = await DatabaseMiddleware.select('user', ['user.id as id', 'user.password', 'user.email', 'user.login', 'user.created_at as created_at', 'user.first_name', 'user.second_name', 'file.path as avatar', 'user.is_blocked', 'user.is_premium', 'user.is_activated'], {where: {or: {'user.email': login, 'user.login': login}}},
+    {
+      file: ['id', 'user.image', 'full']
+    }
+    )
     if (!user) {
       throw ApiError.BadRequest('Пользователя c таким логином не существует')
+    }
+
+    if (!user.is_activated) {
+      throw ApiError.BadRequest('Аккаунт не активирован')
     }
 
     const isPassEquals = await bcrypt.compare(password, user.password)
@@ -52,16 +59,17 @@ class AuthService {
     if (!refresh_token) {
       throw ApiError.Unauthorized()
     }
-
     const userData = TokenService.validateRefreshToken(refresh_token)
     const tokenFromDb = await TokenService.tokenFromDb(refresh_token)
-
     if (!userData || !tokenFromDb) {
       throw ApiError.Unauthorized()
     }
-    const userFromDb = await DatabaseMiddleware.select('user', [], {where: {and: {id: userData.id}}})
+    const userFromDb = await DatabaseMiddleware.select('user', ['user.id as id', 'user.password', 'user.email', 'user.login', 'user.created_at as created_at', 'user.first_name', 'user.second_name', 'file.path as avatar', 'user.is_blocked', 'user.is_premium', 'user.is_activated'], {where: {and: {'user.id': userData.id}}},
+    {
+      file: ['id', 'user.image']
+    }
+    )
     delete userFromDb.password
-
     return this.generateToken(userFromDb)
   }
 

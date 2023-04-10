@@ -22,11 +22,14 @@ class TagService {
       where: {and: { workspace_id }},
       orderby: { created_at: "ASC"}
     })
-    return tags
+    if (tags == null) return []
+    if (tags instanceof Array) return tags
+    return [tags]
   }
 
   async select(tags_id) {
-    const tags = await DatabaseMiddleware.select('tag', ['id', 'name', 'background', 'color'], { where: { in: {id: tags_id}}})
+    if (!tags_id.length) return [] 
+    const tags = await DatabaseMiddleware.select('tag', ['id', 'name', 'background', 'color'], { where: { in: {id: tags_id}}})    
     if (tags == null) return []
     if (tags instanceof Array) return tags
     return [tags]

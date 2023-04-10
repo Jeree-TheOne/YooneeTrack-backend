@@ -3,8 +3,8 @@ const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware');
 
 class TokenService {
   generateToken(payload) {
-    const access_token = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '30d'})
-    const refresh_token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30d'})
+    const access_token = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {expiresIn: '15d'})
+    const refresh_token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {expiresIn: '30 days' })
     return {
       access_token,
       refresh_token

@@ -8,6 +8,6 @@ const AuthMiddleware = require('../Middleware/AuthMiddleware')
 router.post('/add', AuthMiddleware, WorkspaceController.create)
 router.get('/', AuthMiddleware, WorkspaceController.selectAvailable)
 router.get('/:workspace', AuthMiddleware, WorkspaceController.selectOne)
-router.get('/users/:workspace', AuthMiddleware, WorkspaceController.getMembers)
+router.put('/:workspace', AuthMiddleware, WorkspaceController.changeWorkspaceName)
 
 module.exports = router

@@ -1,6 +1,6 @@
 const ApiError = require('../Exceptions/ApiError')
 const pool = require('../pgConfig')
-const { selectTableFromString } = require('../utils/dataFormatter')
+const { selectTableFromString, arrayColumn } = require('../utils/dataFormatter')
 
 class DatabaseMiddleware {
   async select(tableName, columns = [], options, join = null) {
@@ -45,10 +45,23 @@ class DatabaseMiddleware {
 
   async insert(tableName, value = {}, returned = []) {
     const formattedReturned = returned.length ? returned.join(', ') : '*'
+    const values = []
+    if (Object.values(value)[0] instanceof Array) {
+      for (let index = 0; index < Object.values(value)[0].length; index++) {
+        values.push(arrayColumn(Object.values(value), index));
+      }
+    } else {
+      values.push(Object.values(value));
+    }
     try {
+      console.log(`
+      INSERT INTO public."${tableName}" (${Object.keys(value)})
+      VALUES ${values.map(value => `(${value.map(e => `'${e}'`).join(', ')})`)}
+      RETURNING ${formattedReturned};
+    `);
       const data = await pool.query(`
       INSERT INTO public."${tableName}" (${Object.keys(value)})
-      VALUES (${Object.values(value).map(el => `'${el}'`)})
+      VALUES ${values.map(value => `(${value.map(e => `'${e}'`).join(', ')})`)}
       RETURNING ${formattedReturned};
     `)
 

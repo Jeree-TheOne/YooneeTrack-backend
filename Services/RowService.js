@@ -21,7 +21,9 @@ class RowService {
       where: {and: { workspace_id } },
       orderby: { created_at: "ASC"}
     })
-    return rows
+    if (rows instanceof Array) return rows
+    else if (rows) return [rows]
+    else return []
   }
 }
 

@@ -6,5 +6,6 @@ const UserController = require('../Controllers/UserController')
 
 router.put('/change-data', AuthMiddleware, UserController.changeData)
 router.put('/change-password', AuthMiddleware, UserController.changePassword)
+router.delete('/remove-avatar', AuthMiddleware, UserController.removeAvatar)
 
 module.exports = router

@@ -5,7 +5,6 @@ const MemberService = require('../Services/MemberService')
 const RowService = require('../Services/RowService')
 const TagService = require('../Services/TagService')
 const TaskTypeService = require('../Services/TaskTypeService')
-const TokenService = require('../Services/TokenService')
 const WorkspaceService = require('../Services/WorkspaceService')
 
 class WorkspaceController {
@@ -34,7 +33,7 @@ class WorkspaceController {
 
       await TagService.add('Важное', '#FF0000', '#000000', workspaceId)
       
-      return res.redirect(`${process.env.CLIENT_URL}/workspaces/${workspaceId}`)
+      return res.status(200).json({id: workspaceId})
     } catch (e) {
       next(e)
     }
@@ -55,17 +54,17 @@ class WorkspaceController {
 
     const workspaceId = req.params.workspace
     try {
-      const isWorkspaceAvailable = MemberService.isWorkspaceAvailable(userId, workspaceId)
+      const isWorkspaceAvailable = await MemberService.isWorkspaceAvailable(userId, workspaceId)
       if (!isWorkspaceAvailable) {
-        throw ApiError.BadRequest('Рабочее пространство Вам недоступно')
+        throw ApiError.BadRequest('UNAVAILABLE_WORKSPACE')
       }
 
       const [desks, rows, columns, tags, taskTypes, workspace, members] = await Promise.all([
         DeskService.selectAll(workspaceId),
-        TagService.selectAll(workspaceId),
-        TaskTypeService.selectAll(workspaceId),
         RowService.selectAll(workspaceId),
         ColumnService.selectAll(workspaceId),
+        TagService.selectAll(workspaceId),
+        TaskTypeService.selectAll(workspaceId),
         WorkspaceService.selectOne(workspaceId),
         MemberService.getMembers(workspaceId)
       ])
@@ -89,6 +88,17 @@ class WorkspaceController {
     try {
       const members = await MemberService.getMembers(workspace)
       res.status(200).json(members)
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  async changeWorkspaceName(req, res, next) {
+    const { workspace } = req.params
+    const { name } = req.body
+    try {
+      await WorkspaceService.update(workspace, name)
+      res.status(200).json("Успешно")
     } catch (e) {
       next(e)
     }

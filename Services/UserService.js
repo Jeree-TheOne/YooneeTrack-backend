@@ -7,15 +7,22 @@ const bcrypt = require('bcrypt')
 
 class UserService {
   async changeAvatar(id, image_id) {
-    const user = await DatabaseMiddleware.update('user', { image: image_id }, { and: { id } })
-    delete user.password
-    return user
+    await DatabaseMiddleware.update('user', { image: image_id }, { and: { id } })
+    const user = await DatabaseMiddleware.select('user', ['user.id as id', 'user.password', 'user.email', 'user.login', 'user.created_at as created_at', 'user.first_name', 'user.second_name', 'file.path as avatar', 'user.is_blocked', 'user.is_premium', 'user.is_activated'], {where: {and: {'user.id': id}}},
+    {
+      file: ['id', 'user.image']
+    })
+    return generateToken(user)
   }
 
   async changeData(id, login, first_name, second_name, is_blocked, is_premium) {
     try {
-      const user = await DatabaseMiddleware.update('user', removeEmpty({ login, first_name, second_name, is_blocked, is_premium }), { and: { id } })
-      delete user.password
+      console.log(login, first_name, second_name);
+      await DatabaseMiddleware.update('user', removeEmpty({ login, first_name, second_name, is_blocked, is_premium }), { and: { id } })
+      const user = await DatabaseMiddleware.select('user', ['user.id as id', 'user.password', 'user.email', 'user.login', 'user.created_at as created_at', 'user.first_name', 'user.second_name', 'file.path as avatar', 'user.is_blocked', 'user.is_premium', 'user.is_activated'], {where: {and: {'user.id': id}}},
+      {
+        file: ['id', 'user.image']
+      })
       return generateToken(user)
     } catch (e) {
       throw ApiError.BadRequest()
@@ -31,11 +38,22 @@ class UserService {
       }
 
       const hashNewPassword = await bcrypt.hash(newPassword, 10)
-      const user = await DatabaseMiddleware.update('user', { password: hashNewPassword}, { and: { id}})
-      delete user.password
+      await DatabaseMiddleware.update('user', { password: hashNewPassword}, { and: { id}})
+      const user = await DatabaseMiddleware.select('user', ['user.id as id', 'user.password', 'user.email', 'user.login', 'user.created_at as created_at', 'user.first_name', 'user.second_name', 'file.path as avatar', 'user.is_blocked', 'user.is_premium', 'user.is_activated'], {where: {and: {'user.id': id}}},
+      {
+        file: ['id', 'user.image']
+      })
       return generateToken(user)
-
     } catch (err) {
+      throw ApiError.BadRequest()
+    }
+  }
+
+  async removeAvatar(id) {
+    try {
+      await DatabaseMiddleware.select('user', ['image'], {where:{ and: { id }}})
+      await DatabaseMiddleware.update('user', { image: 'null' }, { and: { id }}, ['image'])
+    } catch (e) {
       throw ApiError.BadRequest()
     }
   }

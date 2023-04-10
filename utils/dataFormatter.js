@@ -12,8 +12,11 @@ const selectTableFromString = (string) => {
   return `public."${table}"${params.length ? `.${params.join('.')}` : ''}`
 }
 
+const arrayColumn = (arr, n) => arr.map(x => x[n])
+
 module.exports = {
   removeEmpty,
   jsArrayToPgArray,
-  selectTableFromString
+  selectTableFromString,
+  arrayColumn
 }

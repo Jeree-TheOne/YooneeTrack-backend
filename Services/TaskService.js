@@ -3,9 +3,9 @@ const DatabaseMiddleware = require('../Middleware/DatabaseMiddleware');
 const { removeEmpty, jsArrayToPgArray } = require('../utils/dataFormatter');
 
 class TaskService {
-  async add(title, description, creator, row_id, column_id, desk_id, task_type_id, tags = [], files = []) {
+  async add(title, description, creator, row_id, column_id, desk_id, task_type_id, initial_assessment = 0, performer = null, tags = [], files = []) {
     try {
-      const task = await DatabaseMiddleware.insert('task', {created_at: Date.now(), ...removeEmpty({title, description, creator, row_id, column_id, desk_id, task_type_id, tags: jsArrayToPgArray(tags), files: jsArrayToPgArray(files)})})
+      const task = await DatabaseMiddleware.insert('task', {created_at: Date.now(), ...removeEmpty({title, description, creator, row_id, column_id, desk_id, task_type_id, initial_assessment,  performer, tags: jsArrayToPgArray(tags), files: jsArrayToPgArray(files)})})
       return task
     }
     catch (e) {
@@ -15,7 +15,7 @@ class TaskService {
 
   async selectAll(desk_id) {
     try {
-      const tasks = await DatabaseMiddleware.select('task', ['task.id', 'task.title', 'task.description', 'task.tags', 'task_type.name as task_type', 'task.initial_assessment', 'task.spent_time', 'file.path as performer_avatar', 'task.column_id', 'task.row_id' ], 
+      const tasks = await DatabaseMiddleware.select('task', ['task.id', 'task.title', 'task.description', 'task.tags', 'task_type.name as task_type', 'task.initial_assessment', 'task.spent_time', 'file.path as performer_avatar', 'user.email as performer_email', 'task.column_id', 'task.row_id' ], 
         { where: { and: { 'task.desk_id': desk_id }}},
         { 
           task_type: ['id', 'task.task_type_id', 'full'], 
@@ -48,6 +48,7 @@ class TaskService {
           values[field] = jsArrayToPgArray(value);
         }
       })
+      console.log(removeEmpty({updater, ...values, updated_at: Date.now()}));
       await DatabaseMiddleware.update('task', removeEmpty({updater, ...values, updated_at: Date.now()}), { and: { id: task_id}})
     } catch (e) {
       throw ApiError.BadRequest()

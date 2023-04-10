@@ -11,9 +11,8 @@ class UserController {
       }
 
       const {email, password} = req.body
-      const userData = await AuthService.registration(email, password)
-      res.cookie('refresh-token', userData.refresh_token, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
-      return res.json(userData)
+      await AuthService.registration(email, password)
+      return res.status(200).json('Успешно')
     } catch (e) {
       next(e)
     }
@@ -25,7 +24,6 @@ class UserController {
       if (!errors.isEmpty()) {
         return next(ApiError.BadRequest('Ошибка при валидации данных', errors.array()))
       }
-
       const {login, password} = req.body
       const userData = await AuthService.login(login, password)
       res.cookie('refresh-token', userData.refresh_token, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})

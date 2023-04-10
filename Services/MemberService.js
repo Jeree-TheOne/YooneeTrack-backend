@@ -46,7 +46,7 @@ class MemberService {
 
   async getMemberData(member_id) {
     if (!member_id) return null
-    const member = await DatabaseMiddleware.select('member', ['member.display_name as name', 'file.path'],
+    const member = await DatabaseMiddleware.select('member', ['member.display_name as name', 'file.path', 'member.id as id', 'user.email as email'],
       { where: { and: { 'member.id': member_id }}},
       { 
         user: ['id', 'member.user_id'],

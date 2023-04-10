@@ -21,7 +21,9 @@ class TaskTypeService {
       where: { and: { workspace_id } },
       orderby: { created_at: "ASC"}
     })
-    return task_types
+    if (task_types == null) return []
+    if (task_types instanceof Array) return task_types
+    return [task_types]
   }
 }
 

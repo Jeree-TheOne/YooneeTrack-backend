@@ -22,6 +22,10 @@ class WorkspaceService {
     const workspace = await DatabaseMiddleware.select('workspace', [], { where: { and: { id } }})
     return workspace
   }
+
+  async update(id, name) {
+    await DatabaseMiddleware.update('workspace', { name }, { and: { id }})
+  }
 }
 
 module.exports = new WorkspaceService();

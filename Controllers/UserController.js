@@ -1,13 +1,12 @@
 const ApiError = require('../Exceptions/ApiError');
-const TokenService = require('../Services/TokenService');
 const UserService = require('../Services/UserService')
 
 class UserController {
   async changeData(req, res, next) {
     try {
       const { id } = req.user
-      const { login, firstName, lastName, isBlocked, isPremium } = req.body
-      const data = await UserService.changeData(id, login, firstName, lastName, isBlocked, isPremium)
+      const { login, firstName, secondName, isBlocked, isPremium } = req.body
+      const data = await UserService.changeData(id, login, firstName, secondName, isBlocked, isPremium)
       return res.status(200).json(data)
     } catch (e) {
       next(e)
@@ -23,6 +22,16 @@ class UserController {
       }
       const data = await UserService.changePassword(id, oldPassword, newPassword)
       return res.status(200).json(data)
+    } catch (e) {
+      next(e)
+    }
+  }
+
+  async removeAvatar(req, res, next) {
+    const { id } = req.user
+    try {
+      await UserService.removeAvatar(id)
+      res.status(200).json('Успешно')
     } catch (e) {
       next(e)
     }

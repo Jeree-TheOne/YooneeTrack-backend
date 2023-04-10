@@ -6,16 +6,18 @@ module.exports = async function(req, res, next) {
   try {
     const authorizationHeader = req.headers.authorization
     const workspace = req.headers.workspace
-
     if (!authorizationHeader) {
       return next(ApiError.Unauthorized())
     }
-
     const userData = TokenService.validateAccessToken(authorizationHeader)
     if (!userData) {
       return next(ApiError.Unauthorized())
     }
 
+    const data = TokenService.validateRefreshToken(req.cookies['refresh-token'])
+    if (!data) {
+      return next(ApiError.ExpiredToken())
+    }
     const isWorkspaceAvailable = await MemberService.isWorkspaceAvailable(userData.id, workspace)
     if (isWorkspaceAvailable) req.workspace = workspace
     req.user = userData
